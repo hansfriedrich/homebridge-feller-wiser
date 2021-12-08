@@ -10,15 +10,6 @@ import { FellerWiserPlatform } from './platform';
 export class OnOffLoad {
   private service: Service;
 
-  /**
-   * These are just used to create a working example
-   * You should implement your own code to track the state of your accessory
-   */
-  private exampleStates = {
-    On: false,
-    Brightness: 100,
-  };
-
   constructor(
     private readonly platform: FellerWiserPlatform,
     private readonly accessory: PlatformAccessory,
@@ -45,22 +36,6 @@ export class OnOffLoad {
     this.service.getCharacteristic(this.platform.Characteristic.On)
       .onSet(this.setOn.bind(this))                // SET - bind to the `setOn` method below
       .onGet(this.getOn.bind(this));               // GET - bind to the `getOn` method below
-
-    // register handlers for the Brightness Characteristic
-    this.service.getCharacteristic(this.platform.Characteristic.Brightness)
-      .onSet(this.setBrightness.bind(this));       // SET - bind to the 'setBrightness` method below
-
-    /**
-     * Creating multiple services of the same type.
-     *
-     * To avoid "Cannot add a Service with the same UUID another Service without also defining a unique 'subtype' property." error,
-     * when creating multiple services of the same type, you need to use the following syntax to specify a name and subtype id:
-     * this.accessory.getService('NAME') || this.accessory.addService(this.platform.Service.Lightbulb, 'NAME', 'USER_DEFINED_SUBTYPE_ID');
-     *
-     * The USER_DEFINED_SUBTYPE must be unique to the platform accessory (if you platform exposes multiple accessories, each accessory
-     * can use the same sub type id.)
-     */
-
   }
 
   /**
@@ -69,8 +44,6 @@ export class OnOffLoad {
    */
   async setOn(value: CharacteristicValue) {
     // implement your own code to turn your device on/off
-    this.exampleStates.On = value as boolean;
-
     this.platform.log.debug('Set Characteristic On ->', value);
   }
 
@@ -89,8 +62,8 @@ export class OnOffLoad {
    */
   async getOn(): Promise<CharacteristicValue> {
 
-    return await this.platform.fellerClient.getLoadState(this.accessory.context.device.id).then((value)=> {
-      this.platform.log.debug('value: ' + typeof value);
+    return this.platform.fellerClient.getLoadState(this.accessory.context.device.id).then((value)=> {
+      this.platform.log.debug('Get Characteristic On: ' + value);
       return value.bri !== 0;
     });
 
@@ -99,16 +72,4 @@ export class OnOffLoad {
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
   }
-
-  /**
-   * Handle "SET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, changing the Brightness
-   */
-  async setBrightness(value: CharacteristicValue) {
-    // implement your own code to set the brightness
-    this.exampleStates.Brightness = value as number;
-
-    this.platform.log.debug('Set Characteristic Brightness -> ', value);
-  }
-
 }

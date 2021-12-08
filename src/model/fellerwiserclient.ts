@@ -1,6 +1,7 @@
 
 import { Logger } from 'homebridge';
 import fetch from 'node-fetch';
+import { JSendResponse } from './JSendResponse';
 import { Load } from './load';
 import { LoadState } from './loadstate';
 
@@ -60,13 +61,34 @@ export class FellerWiserClient {
 
   async getLoadState(id: number) : Promise<LoadState>{
     this.log.debug('getLoadstate for id ' + id);
+    this.log.debug(this.baseUrl + 'loads/' + id + '/state');
     if (!this.authToken){
       await this.auth();
     }
-    return await fetch(this.baseUrl + 'loads/' + id + '/state', {headers: {'Cookie': 'auth=' + this.authToken}}).then((response) => {
-      this.log.debug('response', response);
-      return response.json() as Promise<LoadState>;
-    });
+    return fetch(this.baseUrl + 'loads/' + id + '/state', {headers: {'Cookie': 'auth=' + this.authToken}})
+      .then((response) => {
+        return response.json() as JSendResponse;
+      })
+      .then((response) => {
+        this.log.debug('received', response.data.state as LoadState);
+        return response.data.state as LoadState;
+      });
+  }
+
+  async setLoadState(id: number, state: LoadState): Promise<void>{
+    this.log.debug('setLoadstate for id ' + id);
+    if (!this.auth){
+      await this.auth();
+    }
+    return fetch(this.baseUrl + 'loads/' + id + '/target_state', {
+      headers: {'Cookie': 'auth=' + this.authToken},
+      method: 'post',
+      body: state,
+    })
+      .then((response) => {
+        return response.json();
+      });
+
   }
 
 }
