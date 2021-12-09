@@ -1,4 +1,5 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
+import { LoadState } from './model/loadstate';
 
 import { FellerWiserPlatform } from './platform';
 
@@ -27,7 +28,7 @@ export class OnOffLoad {
 
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
-    this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.name);
+    this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.load.name);
 
     // each service must implement at-minimum the "required characteristics" for the given service type
     // see https://developers.homebridge.io/#/service/Lightbulb
@@ -45,6 +46,11 @@ export class OnOffLoad {
   async setOn(value: CharacteristicValue) {
     // implement your own code to turn your device on/off
     this.platform.log.debug('Set Characteristic On ->', value);
+    const target_loadstate = <LoadState>{'bri': value? 10000 : 0};
+    this.platform.fellerClient.setLoadState(this.accessory.context.load.id, target_loadstate).then((value) => {
+      this.platform.log.debug('seted state on ' + this.accessory.context.load.id + ' to value:' + JSON.stringify(value));
+      return;
+    });
   }
 
   /**
@@ -62,7 +68,7 @@ export class OnOffLoad {
    */
   async getOn(): Promise<CharacteristicValue> {
 
-    return this.platform.fellerClient.getLoadState(this.accessory.context.device.id).then((value)=> {
+    return this.platform.fellerClient.getLoadState(this.accessory.context.load.id).then((value)=> {
       this.platform.log.debug('Get Characteristic On: ' + value);
       return value.bri !== 0;
     });

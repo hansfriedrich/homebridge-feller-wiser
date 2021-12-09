@@ -80,10 +80,11 @@ export class FellerWiserClient {
     if (!this.auth){
       await this.auth();
     }
+    this.log.debug('requesting ', this.baseUrl + 'loads/' + id + '/target_state', 'with state', state);
     return fetch(this.baseUrl + 'loads/' + id + '/target_state', {
       headers: {'Cookie': 'auth=' + this.authToken},
-      method: 'post',
-      body: state,
+      method: 'put',
+      body: JSON.stringify(state),
     })
       .then((response) => {
         return response.json();
