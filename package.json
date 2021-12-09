@@ -3,7 +3,7 @@
   "name": "@hansfriedrich/homebridge-feller-wiser",
   "version": "1.0.2",
   "description": "A short description about what your plugin does.",
-  "license": "GPL-3.0-only",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git://github.com/hansfriedrich/homebridge-feller-wiser.git"
