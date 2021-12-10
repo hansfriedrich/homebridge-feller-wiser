@@ -1,4 +1,4 @@
-import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
+import { PlatformAccessory, CharacteristicValue } from 'homebridge';
 import { LoadState } from './model/loadstate';
 import { OnOffLoad } from './onoffload';
 
