@@ -18,7 +18,8 @@ When activated it communicates with the wifi-device of the wiser-system to get a
 
 ## known issues and limitations
 
-* there is no ui implemented
-* loads get their name from the devices name provided by the api (adapt them in the homekit app)
-* currently there are only the switches implemented (no dimmer nor motors)
+* there is no ui implemented (see the config above)
+* currently there are only the switches and dimmer implemented (no motors)
 * there is no support for rooms (adapt them in the homekit app)
+* loads get their name from the devices name provided by the api (adapt them in the homekit app)
+* the handler is slow on requesting all loads, since every loads does a request to the wifi-device on its own
