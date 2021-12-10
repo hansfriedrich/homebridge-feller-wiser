@@ -9,11 +9,11 @@ import { FellerWiserPlatform } from './platform';
  * Each accessory may expose multiple services of different service types.
  */
 export class OnOffLoad {
-  private service: Service;
+  protected service: Service;
 
   constructor(
-    private readonly platform: FellerWiserPlatform,
-    private readonly accessory: PlatformAccessory,
+    protected readonly platform: FellerWiserPlatform,
+    protected readonly accessory: PlatformAccessory,
   ) {
 
     // set accessory information

@@ -2,9 +2,10 @@ import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, 
 //import * as http from 'http';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
-import { OnOffLoad } from './platformAccessory';
+import { OnOffLoad } from './onoffload';
 //import { Load } from './model/load';
 import { FellerWiserClient } from './model/fellerwiserclient';
+import { Dimmer } from './dimmer';
 //import { Accessory } from 'hap-nodejs';
 
 
@@ -61,22 +62,32 @@ export class FellerWiserPlatform implements DynamicPlatformPlugin {
     this.fellerClient.getLoads().then( loads => {
       for (const load of loads){
         // remove this as more types are supported than onoff
-        if (load.type !== 'onoff') {
+        if (load.type !== 'onoff' && load.type !== 'dim') {
           continue;
         }
         const uuid = this.api.hap.uuid.generate(load.name + '-' + load.id + '-' + load.channel );
         const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
         if (existingAccessory){
           this.log.info('Resotring existing accessory from cache:', existingAccessory.displayName);
-          if (load.type === 'onoff'){
-            new OnOffLoad(this, existingAccessory);
+          switch (load.type){
+            case 'onoff':
+              new OnOffLoad(this, existingAccessory);
+              break;
+            case 'dim':
+              new Dimmer(this, existingAccessory);
+              break;
           }
         } else {
           this.log.info('Adding new accessory:', load.device);
           const accessory = new this.api.platformAccessory(load.device, uuid);
           accessory.context.load = load;
-          if (load.type === 'onoff'){
-            new OnOffLoad(this, accessory);
+          switch (load.type){
+            case 'onoff':
+              new OnOffLoad(this, accessory);
+              break;
+            case 'dim':
+              new Dimmer(this, accessory);
+              break;
           }
           this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
         }
