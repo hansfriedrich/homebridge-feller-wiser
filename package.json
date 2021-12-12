@@ -26,10 +26,12 @@
     "homebridge-plugin"
   ],
   "dependencies": {
-    "node-fetch": "^2.6.6"
+    "@types/websocket": "^1.0.4",
+    "node-fetch": "^2.6.6",
+    "websocket": "^1.0.34"
   },
   "devDependencies": {
-    "@types/node": "^16.10.9",
+    "@types/node": "^16.11.12",
     "@types/node-fetch": "^3.0.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
