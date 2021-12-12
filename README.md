@@ -7,6 +7,7 @@ When activated it communicates with the wifi-device of the wiser-system to get a
 ## Configuration
 
 To get an authkey follow the instructins on the [api documentation](https://github.com/Feller-AG/wiser-tutorial/blob/main/doc/authentication.md#get-the-authentication-code).
+
     "platforms": [
         [...]
         {
