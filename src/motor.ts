@@ -20,6 +20,8 @@ export class Motor {
         this.service = this.accessory.getService(this.platform.Service.WindowCovering)
         || this.accessory.addService(this.platform.Service.WindowCovering);
 
+        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.load.name);
+
         this.service.getCharacteristic(this.platform.Characteristic.CurrentPosition)
           .onGet(this.getCurrentPosition.bind(this));
         this.service.getCharacteristic(this.platform.Characteristic.PositionState)
