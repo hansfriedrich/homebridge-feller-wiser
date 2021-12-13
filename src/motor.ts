@@ -46,10 +46,11 @@ export class Motor {
   }
 
   async setTargetPosition(value: CharacteristicValue): Promise<void> {
+    this.platform.log.debug('setTargetPosition ', value);
     return;
   }
 
   async updateState (loadState: LoadState){
-    return;
+    this.platform.log.debug('updateState', loadState);
   }
 }
