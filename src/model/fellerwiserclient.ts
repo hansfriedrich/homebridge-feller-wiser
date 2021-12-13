@@ -5,15 +5,17 @@ import { JSendResponse } from './JSendResponse';
 import { Load } from './load';
 import { LoadState } from './loadstate';
 import WebSocket = require('websocket');
+import { EventEmitter } from 'stream';
 
 
-export class FellerWiserClient {
+export class FellerWiserClient{
   private authkey: string;
   private authToken : string | undefined;
   private log : Logger;
   private websocket : WebSocket.client;
   private baseUrl: string;
   private loadstates : Map<number, LoadState>;
+  public loadStateChange : EventEmitter;
 
   constructor(config, log) {
     this.log = log;
@@ -22,12 +24,14 @@ export class FellerWiserClient {
     this.websocket = new WebSocket.client();
     this.baseUrl = 'http://' + config.ip + '/api';
     this.loadstates = new Map<number, LoadState>();
+    this.loadStateChange = new EventEmitter();
 
     this.websocket.on('connectFailed', (error) => {
       this.log.error('websocket connection failed with', error);
     });
 
     this.websocket.on('connect', (connection) => {
+      // when the websocket connection is established read the load states
       this.log.debug('websocket connection established');
       this.log.debug('requesting dump_load');
       connection.send(JSON.stringify({'command': 'dump_loads'}));
@@ -41,24 +45,30 @@ export class FellerWiserClient {
       });
 
       connection.on('message', (message) => {
+        // when a new message is received, add the loadstate to the cache
         if (message.type === 'utf8'){
           const jsonMessage = JSON.parse(message.utf8Data);
           const id = jsonMessage.load.id as number;
           const loadstate = jsonMessage.load.state as LoadState;
+
+          // write the received state to the state cache
           this.loadstates.set(id, loadstate);
           this.log.debug('new loadstate for ', id, 'to', loadstate);
+
+          // inform the listeners for this load
+          this.loadStateChange.emit(id.toString(), loadstate);
+
         }
 
       });
     });
+
+    // finally establish the connection to the websocket
     this.websocket.connect('ws://' + config.ip + '/api', '', undefined, {'Authorization': 'Bearer ' + config.authkey} );
   }
 
-  async updateLoadState() : Promise <void> {
-    this.websocket.connect;
-  }
-
   async getLoads() : Promise<Load[]>{
+    // fetch the loads through the http-api
     const result = await fetch (this.baseUrl + '/loads', {headers: {'Authorization': 'Bearer ' + this.authkey}})
       .then((response) => {
         return response.json();

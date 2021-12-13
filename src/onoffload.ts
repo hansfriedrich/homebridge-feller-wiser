@@ -1,4 +1,4 @@
-import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
+import { Service, PlatformAccessory, CharacteristicValue, Characteristic } from 'homebridge';
 import { LoadState } from './model/loadstate';
 
 import { FellerWiserPlatform } from './platform';
@@ -37,6 +37,8 @@ export class OnOffLoad {
     this.service.getCharacteristic(this.platform.Characteristic.On)
       .onSet(this.setOn.bind(this))                // SET - bind to the `setOn` method below
       .onGet(this.getOn.bind(this));               // GET - bind to the `getOn` method below
+
+    this.platform.fellerClient.loadStateChange.on(this.accessory.context.load.id.toString(), (loadState) => this.updateOn(loadState));
   }
 
   /**
@@ -73,9 +75,13 @@ export class OnOffLoad {
       return value.bri !== 0;
     });
 
-
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
 
+  }
+
+  async updateOn(state: LoadState) : Promise<void> {
+    this.platform.log.debug('update new loadstate on', this.accessory.context.load.id);
+    this.service.updateCharacteristic(this.platform.Characteristic.On, state.bri !== 0);
   }
 }
