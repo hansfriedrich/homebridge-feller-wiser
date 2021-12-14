@@ -26,6 +26,10 @@ export class FellerWiserClient{
     this.loadstates = new Map<number, LoadState>();
     this.loadStateChange = new EventEmitter();
 
+    const connect = () => {
+      this.websocket.connect('ws://' + config.ip + '/api', '', undefined, {'Authorization': 'Bearer ' + config.authkey} );
+    };
+
     this.websocket.on('connectFailed', (error) => {
       this.log.error('websocket connection failed with', error);
     });
@@ -41,7 +45,8 @@ export class FellerWiserClient{
       });
 
       connection.on('close', () => {
-        this.log.debug('websocket connection closed');
+        this.log.debug('websocket connection closed... reconnecting');
+        connect();
       });
 
       connection.on('message', (message) => {
@@ -62,10 +67,10 @@ export class FellerWiserClient{
 
       });
     });
-
     // finally establish the connection to the websocket
-    this.websocket.connect('ws://' + config.ip + '/api', '', undefined, {'Authorization': 'Bearer ' + config.authkey} );
+    connect();
   }
+
 
   async getLoads() : Promise<Load[]>{
     // fetch the loads through the http-api
