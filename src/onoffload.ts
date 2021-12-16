@@ -71,7 +71,7 @@ export class OnOffLoad {
   async getOn(): Promise<CharacteristicValue> {
 
     return this.platform.fellerClient.getLoadState(this.accessory.context.load.id).then((value)=> {
-      this.platform.log.debug('Get Characteristic On: ' + value);
+      //this.platform.log.debug('Get Characteristic On: ' + value);
       return value.bri !== 0;
     });
 
@@ -81,7 +81,7 @@ export class OnOffLoad {
   }
 
   async updateOn(state: LoadState) : Promise<void> {
-    this.platform.log.debug('update new loadstate on', this.accessory.context.load.id);
+    //this.platform.log.debug('update new loadstate on', this.accessory.context.load.id);
     this.service.updateCharacteristic(this.platform.Characteristic.On, state.bri !== 0);
   }
 }

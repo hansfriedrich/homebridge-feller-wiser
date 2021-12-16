@@ -33,9 +33,9 @@ export class Dimmer extends OnOffLoad{
   }
 
   async getBrightness() : Promise<CharacteristicValue> {
-    this.platform.log.debug('getBrightness');
+    //this.platform.log.debug('getBrightness');
     return this.platform.fellerClient.getLoadState(this.accessory.context.load.id).then((value) => {
-      this.platform.log.debug('got value for dimmer', this.accessory.context.load.id, value);
+      //this.platform.log.debug('got value for dimmer', this.accessory.context.load.id, value);
       if (typeof value.bri !== 'undefined') {
         return value.bri / 100;
       } else {

@@ -75,16 +75,16 @@ export class FellerWiserClient{
 
     const loadstate = this.loadstates.get(id);
     if (loadstate){
-      this.log.debug('found loadstate for id', id, 'in cache. Returning', loadstate);
+      //this.log.debug('found loadstate for id', id, 'in cache. Returning', loadstate);
       return loadstate;
     } else{
-      this.log.debug('fetching loadstate via api', this.baseUrl + '/loads/' + id + '/state');
+      //this.log.debug('fetching loadstate via api', this.baseUrl + '/loads/' + id + '/state');
       return fetch(this.baseUrl + '/loads/' + id + '/state', {headers: {'Authorization': 'Bearer ' + this.authkey}})
         .then((response) => {
           return response.json() as JSendResponse;
         })
         .then((response) => {
-          this.log.debug('received', response.data.state as LoadState);
+          //this.log.debug('received', response.data.state as LoadState);
           return response.data.state as LoadState;
         });
     }
