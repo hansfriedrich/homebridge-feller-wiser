@@ -6,6 +6,7 @@ import { Load } from './load';
 import { LoadState } from './loadstate';
 import WebSocket = require('websocket');
 import { EventEmitter } from 'stream';
+import { LoadCtrl } from '../types';
 
 
 export class FellerWiserClient{
@@ -58,7 +59,6 @@ export class FellerWiserClient{
 
           // write the received state to the state cache
           this.loadstates.set(id, loadstate);
-          this.log.debug('new loadstate for ', id, 'to', loadstate);
 
           // inform the listeners for this load
           this.loadStateChange.emit(id.toString(), loadstate);
@@ -94,16 +94,14 @@ export class FellerWiserClient{
 
     const loadstate = this.loadstates.get(id);
     if (loadstate){
-      this.log.debug('found loadstate for id', id, 'in cache. Returning', loadstate);
       return loadstate;
     } else{
-      this.log.debug('fetching loadstate via api', this.baseUrl + '/loads/' + id + '/state');
+      this.log.debug('fetching loadstate via API', this.baseUrl + '/loads/' + id + '/state');
       return fetch(this.baseUrl + '/loads/' + id + '/state', {headers: {'Authorization': 'Bearer ' + this.authkey}})
         .then((response) => {
           return response.json() as JSendResponse;
         })
         .then((response) => {
-          this.log.debug('received', response.data.state as LoadState);
           return response.data.state as LoadState;
         });
     }
@@ -111,8 +109,6 @@ export class FellerWiserClient{
 
   async setLoadState(id: number, state: LoadState): Promise<void>{
     this.log.debug('setLoadstate for id ' + id);
-
-    this.log.debug('requesting ', this.baseUrl + '/loads/' + id + '/target_state', 'with state', state);
     return fetch(this.baseUrl + '/loads/' + id + '/target_state', {
       headers: {'Authorization': 'Bearer ' + this.authToken},
       method: 'put',
@@ -122,6 +118,17 @@ export class FellerWiserClient{
         return response.json();
       });
 
+  }
+
+  async ctrlLoad(id: number, loadCtrl : LoadCtrl){
+    return fetch(this.baseUrl + '/loads/' + id + '/ctrl', {
+      headers: {'Authorization': 'Bearer ' + this.authToken},
+      method: 'put',
+      body: JSON.stringify(loadCtrl),
+    })
+      .then((response) => {
+        return response.json();
+      });
   }
 
 }

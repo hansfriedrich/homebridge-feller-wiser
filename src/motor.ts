@@ -7,7 +7,6 @@ import { FellerWiserPlatform } from './platform';
 
 export class Motor {
   protected service : Service;
-  protected cachedTargetPosition : CharacteristicValue = -1;
 
   // new model
   protected positionState : CharacteristicValue = 0;
@@ -46,77 +45,54 @@ export class Motor {
   }
 
   async getCurrentPosition() : Promise<CharacteristicValue> {
-    return this.platform.fellerClient.getLoadState(this.accessory.context.load.id).then(
-      (loadState) => {
-        this.platform.log.debug('received loadstate for ', this.accessory.context.load.id, loadState);
-        if (typeof loadState.level !== 'undefined'){
-          return loadState.level / 100;
-        }
-        throw new Error('could not read level of motor ' + this.accessory.context.load.id);
-      },
-    );
+    return this.currentPosition;
   }
 
   async getPositionState() : Promise<CharacteristicValue> {
-    return this.platform.fellerClient.getLoadState(this.accessory.context.load.id).then((loadState) => {
-      switch (loadState.moving){
-        case 'stop':
-          return this.platform.Characteristic.PositionState.STOPPED;
-        case 'up':
-          return this.platform.Characteristic.PositionState.INCREASING;
-        case 'down':
-          return this.platform.Characteristic.PositionState.DECREASING;
-        default:
-          throw new Error('could not read positionstate for motor ' + this.accessory.context.load.id);
-      }
-    });
+    return this.positionState;
   }
 
   async getTargetPosition() : Promise<CharacteristicValue>{
-    if (this.cachedTargetPosition !== -1) {
-      return this.cachedTargetPosition;
-    } else {
-      return this.getCurrentPosition();
-    }
+    return this.targetPosition;
   }
 
   async setTargetPosition(value: CharacteristicValue): Promise<void> {
     this.platform.log.debug('setTargetPosition ', value);
     if ('number' === typeof value){
-      this.cachedTargetPosition = value;
+      this.targetPosition = value;
       return this.platform.fellerClient.setLoadState(this.accessory.context.load.id,
         {
-          'level' : value * 100,
+          'level' : (100-value) * 100,
         });
     }
   }
 
   async updateState (loadState: LoadState){
     this.platform.log.debug('updateState', loadState);
-    if (typeof loadState.moving !== 'undefined'){
-      let posState = -1;
-      switch(loadState.moving){
-        case 'stop':
-          this.cachedTargetPosition = -1;
-          posState = this.platform.Characteristic.PositionState.STOPPED;
-          if (typeof loadState.level !== 'undefined') {
-            this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, loadState.level / 100);
-          }
-          break;
-        case 'down':
-          posState = this.platform.Characteristic.PositionState.DECREASING;
-          this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, 100);
-          break;
-        case 'up':
-          posState = this.platform.Characteristic.PositionState.INCREASING;
-          this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, 0);
-          break;
-      }
-      this.service.updateCharacteristic( this.platform.Characteristic.PositionState, posState);
+
+    switch(loadState.moving){
+      case 'stop':
+        this.positionState = this.platform.Characteristic.PositionState.STOPPED;
+        this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, (100-loadState.level!) / 100);
+        break;
+      case 'down':
+        this.positionState = this.platform.Characteristic.PositionState.DECREASING;
+        break;
+      case 'up':
+        this.positionState = this.platform.Characteristic.PositionState.INCREASING;
+        break;
     }
+    this.service.updateCharacteristic( this.platform.Characteristic.PositionState, this.positionState);
+
+    this.currentPosition = (100-loadState.level!) / 100;
+    this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, (100-loadState.level!) / 100);
+
   }
 
   async setHoldPosition() : Promise<void> {
-    return;
+    this.platform.fellerClient.ctrlLoad(this.accessory.context.load.id, {
+      button: 'stop',
+      event: 'click',
+    });
   }
 }
