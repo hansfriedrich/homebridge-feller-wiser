@@ -21,9 +21,9 @@ export class FellerWiserClient{
     this.log = log;
     this.authkey = config.authkey;
     this.log.debug('feller client built');
+    this.loadStateChange = new EventEmitter();
     this.websocket = new WebSocket('ws://' + config.ip + '/api', [], {headers: {'Authorization': 'Bearer ' + config.authkey}} );
     this.baseUrl = 'http://' + config.ip + '/api';
-    this.loadStateChange = new EventEmitter();
 
 
     this.websocket.on('error', (error) => {
@@ -35,6 +35,7 @@ export class FellerWiserClient{
     });
 
     this.websocket.on('message', (message) => {
+      this.log.debug('message', message.toLocaleString());
       const jsonMessage = JSON.parse(message.toLocaleString());
       const id = jsonMessage.load.id as number;
       const loadstate = jsonMessage.load.state as LoadState;
@@ -42,8 +43,13 @@ export class FellerWiserClient{
       // inform the listeners for this load
       this.loadStateChange.emit(id.toString(), loadstate);
     });
-    // finally establish the connection to the websocket
+
+    this.websocket.on('open', () => {
+      this.log.debug('sending dump_loads');
+      this.websocket.send(JSON.stringify({'command': 'dump_loads'}));
+    });
   }
+
 
 
   async getLoads() : Promise<Load[]>{
@@ -76,7 +82,7 @@ export class FellerWiserClient{
 
   }
 
-  async setLoadState(id: number, state: LoadState): Promise<void>{
+  async setLoadState(id: number, state: LoadState): Promise<LoadState>{
     this.log.debug('setLoadstate for id ' + id);
     return fetch(this.baseUrl + '/loads/' + id + '/target_state', {
       headers: {'Authorization': 'Bearer ' + this.authToken},
@@ -85,6 +91,13 @@ export class FellerWiserClient{
     })
       .then((response) => {
         return response.json();
+      })
+      .then((json) => {
+        if (json.status === 'success'){
+          return json.data as LoadState;
+        } else {
+          throw new Error(json.message);
+        }
       });
 
   }

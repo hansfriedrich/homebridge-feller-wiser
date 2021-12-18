@@ -63,7 +63,9 @@ export class Motor {
       return this.platform.fellerClient.setLoadState(this.accessory.context.load.id,
         {
           'level' : (100-value) * 100,
-        });
+        }).then(() => {
+        return;
+      });
     }
   }
 
@@ -73,7 +75,7 @@ export class Motor {
     switch(loadState.moving){
       case 'stop':
         this.positionState = this.platform.Characteristic.PositionState.STOPPED;
-        this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, (100-loadState.level!) / 100);
+        this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, (10000-loadState.level!) / 100);
         break;
       case 'down':
         this.positionState = this.platform.Characteristic.PositionState.DECREASING;
@@ -84,8 +86,9 @@ export class Motor {
     }
     this.service.updateCharacteristic( this.platform.Characteristic.PositionState, this.positionState);
 
-    this.currentPosition = (100-loadState.level!) / 100;
-    this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, (100-loadState.level!) / 100);
+    this.platform.log.debug('setting curr position to ', loadState.level);
+    this.currentPosition = (10000-loadState.level!) / 100;
+    this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, (10000-loadState.level!) / 100);
 
   }
 

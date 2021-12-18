@@ -11,6 +11,8 @@ import { FellerWiserPlatform } from './platform';
  */
 export class Dimmer extends OnOffLoad{
 
+  protected brightness : CharacteristicValue;
+
   constructor(
     protected readonly platform: FellerWiserPlatform,
     protected readonly accessory: PlatformAccessory,
@@ -20,6 +22,8 @@ export class Dimmer extends OnOffLoad{
     this.service.getCharacteristic(this.platform.Characteristic.Brightness)
       .onSet(this.setBrightness.bind(this))
       .onGet(this.getBrightness.bind(this));
+
+    this.brightness = 0;
   }
 
   async setBrightness(value : CharacteristicValue) : Promise<void>{
@@ -33,6 +37,8 @@ export class Dimmer extends OnOffLoad{
   }
 
   async getBrightness() : Promise<CharacteristicValue> {
+    return this.brightness;
+
     //this.platform.log.debug('getBrightness');
     return this.platform.fellerClient.getLoadState(this.accessory.context.load.id).then((value) => {
       //this.platform.log.debug('got value for dimmer', this.accessory.context.load.id, value);
