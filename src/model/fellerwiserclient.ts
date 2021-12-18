@@ -5,15 +5,14 @@ import { JSendResponse } from './JSendResponse';
 import { Load } from './load';
 import { LoadState } from './loadstate';
 import { EventEmitter } from 'stream';
-import WebSocket from 'ws';
 import { LoadCtrl } from '../types';
-
+import { io, Socket } from 'socket.io-client';
 
 export class FellerWiserClient{
   private authkey: string;
   private authToken : string | undefined;
   private log : Logger;
-  private websocket : WebSocket;
+  private websocket : Socket;
   private baseUrl: string;
   public loadStateChange : EventEmitter;
 
@@ -22,7 +21,7 @@ export class FellerWiserClient{
     this.authkey = config.authkey;
     this.log.debug('feller client built');
     this.loadStateChange = new EventEmitter();
-    this.websocket = new WebSocket('ws://' + config.ip + '/api', [], {headers: {'Authorization': 'Bearer ' + config.authkey}} );
+    this.websocket = io('ws://' + config.ip, {path: '/api', extraHeaders: {'Authorization': 'Bearer ' + config.authkey}});
     this.baseUrl = 'http://' + config.ip + '/api';
 
 
