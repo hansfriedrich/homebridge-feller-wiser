@@ -48,6 +48,10 @@ export class FellerWiserClient{
       this.log.debug('sending dump_loads');
       this.websocket.send(JSON.stringify({'command': 'dump_loads'}));
     });
+
+    setInterval(() => {
+      this.websocket.ping();
+    }, 60000 * 10);
   }
 
 
