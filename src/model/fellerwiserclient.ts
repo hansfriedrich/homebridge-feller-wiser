@@ -6,13 +6,14 @@ import { Load } from './load';
 import { LoadState } from './loadstate';
 import { EventEmitter } from 'stream';
 import { LoadCtrl } from '../types';
-import { io, Socket } from 'socket.io-client';
+import WebSocket from 'ws';
+
 
 export class FellerWiserClient{
   private authkey: string;
   private authToken : string | undefined;
   private log : Logger;
-  private websocket : Socket;
+  private websocket : WebSocket;
   private baseUrl: string;
   public loadStateChange : EventEmitter;
 
@@ -21,32 +22,31 @@ export class FellerWiserClient{
     this.authkey = config.authkey;
     this.log.debug('feller client built');
     this.loadStateChange = new EventEmitter();
-    this.websocket = io('ws://' + config.ip, {path: '/api', extraHeaders: {'Authorization': 'Bearer ' + config.authkey}});
+
+    const createWebSocket = (ip = config.ip, authkey = config.authkey) => {
+      const result = new WebSocket('ws://' + ip + '/api', [], {headers: {'Authorization': 'Bearer ' + authkey}} );
+
+      result.on('message', (message) => {
+        this.log.debug('message received', message.toLocaleString());
+        const jsonMessage = JSON.parse(message.toLocaleString());
+        const id = jsonMessage.load.id as number;
+        const loadstate = jsonMessage.load.state as LoadState;
+        // inform the listeners for this load
+        this.loadStateChange.emit(id.toString(), loadstate);
+      });
+
+
+      result.on('close', () => {
+        this.log.error('websocket connetion closed ... reconnecting');
+        this.websocket = createWebSocket();
+      });
+
+      return result;
+    };
+
+    this.websocket = createWebSocket(config.ip, config.authkey);
+
     this.baseUrl = 'http://' + config.ip + '/api';
-
-
-    this.websocket.on('error', (error) => {
-      this.log.error('connection error', error.toString());
-    });
-
-    this.websocket.on('close', () => {
-      this.log.error('websocket connetion closed');
-    });
-
-    this.websocket.on('message', (message) => {
-      this.log.debug('message', message.toLocaleString());
-      const jsonMessage = JSON.parse(message.toLocaleString());
-      const id = jsonMessage.load.id as number;
-      const loadstate = jsonMessage.load.state as LoadState;
-
-      // inform the listeners for this load
-      this.loadStateChange.emit(id.toString(), loadstate);
-    });
-
-    this.websocket.on('open', () => {
-      this.log.debug('sending dump_loads');
-      this.websocket.send(JSON.stringify({'command': 'dump_loads'}));
-    });
   }
 
 
