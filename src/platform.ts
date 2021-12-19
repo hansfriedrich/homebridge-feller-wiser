@@ -63,7 +63,7 @@ export class FellerWiserPlatform implements DynamicPlatformPlugin {
     this.fellerClient.getLoads().then( loads => {
       for (const load of loads){
         // remove this as more types are supported than onoff
-        if (load.type !== 'onoff' && load.type !== 'dim' && load.type !== 'motor') {
+        if (load.type !== 'onoff' && load.type !== 'dim' /* && load.type !== 'motor' */) {
           continue;
         }
         const uuid = this.api.hap.uuid.generate(load.name + '-' + load.id + '-' + load.channel );
@@ -77,9 +77,9 @@ export class FellerWiserPlatform implements DynamicPlatformPlugin {
             case 'dim':
               new Dimmer(this, existingAccessory);
               break;
-            case 'motor':
+            /*case 'motor':
               new Motor(this, existingAccessory);
-              break;
+              break; */
           }
         } else {
           this.log.info('Adding new accessory:', load.device);
@@ -92,9 +92,9 @@ export class FellerWiserPlatform implements DynamicPlatformPlugin {
             case 'dim':
               new Dimmer(this, accessory);
               break;
-            case 'motor':
+            /* case 'motor':
               new Motor(this, accessory);
-              break;
+              break; */
           }
           this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
         }
