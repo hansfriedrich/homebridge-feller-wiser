@@ -5,11 +5,17 @@
   "schema": {
     "type": "object",
     "properties": {
-      "name": {
-        "title": "Name",
+      "ip": {
+        "title": "IP address",
         "type": "string",
         "required": true,
-        "default": "Example Dynamic Platform"
+        "default": ""
+      },
+      "authkey" : {
+        "title" : "authorization token",
+        "type": "string",
+        "required": true,
+        "default": ""
       }
     }
   }

@@ -1,5 +1,4 @@
-import { Load } from './model/load';
-
-export interface WiserAPI {
-    getLoads: () => Promise<Load[]>;
+export interface LoadCtrl {
+    button: 'on' | 'off'| 'up' | 'down' | 'toggle' | 'stop';
+    event: 'click' | 'press' | 'release';
 }

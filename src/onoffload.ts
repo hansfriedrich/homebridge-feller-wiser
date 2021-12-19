@@ -10,6 +10,7 @@ import { FellerWiserPlatform } from './platform';
  */
 export class OnOffLoad {
   protected service: Service;
+  protected on : boolean;
 
   constructor(
     protected readonly platform: FellerWiserPlatform,
@@ -37,6 +38,8 @@ export class OnOffLoad {
     this.service.getCharacteristic(this.platform.Characteristic.On)
       .onSet(this.setOn.bind(this))                // SET - bind to the `setOn` method below
       .onGet(this.getOn.bind(this));               // GET - bind to the `getOn` method below
+
+    this.on = false;
 
     this.platform.fellerClient.loadStateChange.on(this.accessory.context.load.id.toString(), (loadState) => this.updateOn(loadState));
   }
@@ -70,8 +73,10 @@ export class OnOffLoad {
    */
   async getOn(): Promise<CharacteristicValue> {
 
+    return this.on;
+    // REMOVE THIS
     return this.platform.fellerClient.getLoadState(this.accessory.context.load.id).then((value)=> {
-      this.platform.log.debug('Get Characteristic On: ' + value);
+      //this.platform.log.debug('Get Characteristic On: ' + value);
       return value.bri !== 0;
     });
 
@@ -80,8 +85,10 @@ export class OnOffLoad {
 
   }
 
+  //TODO: update this method name to "updateState"
   async updateOn(state: LoadState) : Promise<void> {
-    this.platform.log.debug('update new loadstate on', this.accessory.context.load.id);
+    this.on = state.bri !== 0;
+    //this.platform.log.debug('update new loadstate on', this.accessory.context.load.id);
     this.service.updateCharacteristic(this.platform.Characteristic.On, state.bri !== 0);
   }
 }

@@ -2,6 +2,6 @@ export interface LoadState{
   bri?: number;
   level?: number;
   tilt?: number;
-  moving?: string;
+  moving?: 'down' | 'up' | 'stop';
   flags?: any;
 }
