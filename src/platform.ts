@@ -6,7 +6,6 @@ import { OnOffLoad } from './onoffload';
 //import { Load } from './model/load';
 import { FellerWiserClient } from './model/fellerwiserclient';
 import { Dimmer } from './dimmer';
-import { Motor } from './motor';
 //import { Accessory } from 'hap-nodejs';
 
 
