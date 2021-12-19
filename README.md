@@ -23,4 +23,3 @@ To get an authkey follow the instructins on the [api documentation](https://gith
 * currently there are only the switches and dimmer implemented (no motors)
 * there is no support for rooms (adapt them in the homekit app)
 * loads get their name from the devices name provided by the api (adapt them in the homekit app)
-* the handler is slow on requesting all loads, since every loads does a request to the wifi-device on its own
