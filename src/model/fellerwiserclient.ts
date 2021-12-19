@@ -7,6 +7,7 @@ import { LoadState } from './loadstate';
 import { EventEmitter } from 'stream';
 import { LoadCtrl } from '../types';
 import WebSocket from 'ws';
+import { writeSync } from 'fs';
 
 
 export class FellerWiserClient{
@@ -33,6 +34,11 @@ export class FellerWiserClient{
         const loadstate = jsonMessage.load.state as LoadState;
         // inform the listeners for this load
         this.loadStateChange.emit(id.toString(), loadstate);
+      });
+
+      result.on('open', () => {
+        this.log.debug('websocket opened, sending command "dump_loads"');
+        result.send(JSON.stringify({'command': 'dump_loads'}));
       });
 
 
