@@ -7,7 +7,6 @@ import { LoadState } from './loadstate';
 import { EventEmitter } from 'stream';
 import { LoadCtrl } from '../types';
 import WebSocket from 'ws';
-import { writeSync } from 'fs';
 
 
 export class FellerWiserClient{
