@@ -31,18 +31,32 @@ export class FellerWiserClient{
         const jsonMessage = JSON.parse(message.toLocaleString());
         const id = jsonMessage.load.id as number;
         const loadstate = jsonMessage.load.state as LoadState;
-        // inform the listeners for this load
+        // inform the listener(s) for this load
         this.loadStateChange.emit(id.toString(), loadstate);
       });
 
       result.on('open', () => {
         this.log.debug('websocket opened, sending command "dump_loads"');
         result.send(JSON.stringify({'command': 'dump_loads'}));
+
+        const keepalive = setInterval(() => {
+          result.ping((error) => {
+            if (error) {
+              this.log.error('error on keepalive websocket', error);
+              clearInterval(keepalive);
+            }
+          });
+          this.log.debug('ping sent');
+        }, 3600000 );
       });
 
+      result.on('close', (code, data) => {
+        this.log.error('websocket connetion closed with code', code, 'reason: ', data.toString(), '... reconnecting');
+        this.websocket = createWebSocket();
+      });
 
-      result.on('close', () => {
-        this.log.error('websocket connetion closed ... reconnecting');
+      result.on('error', (error) => {
+        this.log.error('error occured on websocket', error.message, '... reconnecting');
         this.websocket = createWebSocket();
       });
 
@@ -50,10 +64,8 @@ export class FellerWiserClient{
     };
 
     this.websocket = createWebSocket(config.ip, config.authkey);
-
     this.baseUrl = 'http://' + config.ip + '/api';
   }
-
 
 
   async getLoads() : Promise<Load[]>{
@@ -73,6 +85,7 @@ export class FellerWiserClient{
     return result;
   }
 
+  // dont use this method for getting a single load - they will be emitted via the websocket (see constructor)
   async getLoadState(id: number) : Promise<LoadState>{
 
     this.log.debug('fetching loadstate via API', this.baseUrl + '/loads/' + id + '/state');
@@ -86,6 +99,7 @@ export class FellerWiserClient{
 
   }
 
+  // sets the load state of the specified load with the given id
   async setLoadState(id: number, state: LoadState): Promise<LoadState>{
     this.log.debug('setLoadstate for id ' + id);
     return fetch(this.baseUrl + '/loads/' + id + '/target_state', {
