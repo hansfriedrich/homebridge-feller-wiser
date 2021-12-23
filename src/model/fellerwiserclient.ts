@@ -43,6 +43,11 @@ export class FellerWiserClient{
           result.ping((error) => {
             if (error) {
               this.log.error('error on keepalive websocket', error);
+              // if readystate = 3 (CLOSED) => reconnect
+              if (this.websocket.readyState === 3){
+                this.log.error('reconnecting');
+                this.websocket = createWebSocket();
+              }
               clearInterval(keepalive);
             }
           });
