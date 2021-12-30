@@ -78,6 +78,7 @@ export class Motor {
       case 'stop':
         this.positionState = this.platform.Characteristic.PositionState.STOPPED;
         this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, (10000-loadState.level!) / 100);
+        this.targetPosition = (10000-loadState.level!) / 100;
         break;
       case 'down':
         this.positionState = this.platform.Characteristic.PositionState.DECREASING;
@@ -89,10 +90,12 @@ export class Motor {
     this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, (10000-loadState.level!) / 100);
     this.service.updateCharacteristic( this.platform.Characteristic.PositionState, this.positionState);
 
-    this.platform.log.debug('setting curr position to ', loadState.level);
     this.currentPosition = (10000-loadState.level!) / 100;
     this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, (10000-loadState.level!) / 100);
 
+    this.platform.log.debug('position state', this.positionState);
+    this.platform.log.debug('current position', this.currentPosition);
+    this.platform.log.debug('target position', this.targetPosition);
   }
 
   async setHoldPosition() : Promise<void> {
