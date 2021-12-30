@@ -54,6 +54,7 @@ export class Dimmer extends OnOffLoad{
     if (typeof state.bri !== 'undefined'){
       this.service.updateCharacteristic(this.platform.Characteristic.Brightness, state.bri / 100);
       this.brightness = state.bri / 100;
+      this.on = state.bri !== 0;
     }
   }
 }
