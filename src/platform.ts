@@ -62,7 +62,7 @@ export class FellerWiserPlatform implements DynamicPlatformPlugin {
   discoverDevices() {
     this.fellerClient.getLoads().then( loads => {
       for (const load of loads){
-        // remove this as more types are supported than onoff
+        // edit this as more types are supported than onoff, dim or motor
         if (load.type !== 'onoff' && load.type !== 'dim' && load.type !== 'motor' ) {
           continue;
         }
