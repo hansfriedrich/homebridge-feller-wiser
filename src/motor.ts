@@ -20,9 +20,9 @@ export class Motor {
   ){
 
         this.accessory.getService(this.platform.Service.AccessoryInformation)!
-          .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Feller')
-          .setCharacteristic(this.platform.Characteristic.Model, 'Default-Model')
-          .setCharacteristic(this.platform.Characteristic.SerialNumber, 'Default-Serial');
+          .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Feller AG')
+          .setCharacteristic(this.platform.Characteristic.Model, 'undefined')
+          .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.UUID);
 
         this.service = this.accessory.getService(this.platform.Service.WindowCovering)
         || this.accessory.addService(this.platform.Service.WindowCovering);
