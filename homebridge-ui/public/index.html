@@ -1,0 +1,19 @@
+<p><input type="button" id="btnGetApiKey" value="get API key"></p>
+
+<script>
+    homebridge.showSpinner();
+    homebridge.addEventListener('ready', () => {
+        homebridge.hideSpinner();
+        homebridge.showSchemaForm();
+    });
+
+    document.getElementById("btnGetApiKey").onclick = function(){
+        homebridge.showSpinner();
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", )
+
+        homebridge.toast.info("now push the blinking button");
+        setTimeout(()=>homebridge.hideSpinner(), 1000);
+    }
+</script>
