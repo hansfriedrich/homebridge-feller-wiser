@@ -1,0 +1,3 @@
+select option[disabled] {
+    display: none;
+}
