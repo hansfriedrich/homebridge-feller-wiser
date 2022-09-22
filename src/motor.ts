@@ -13,9 +13,9 @@ export class Motor {
   protected service: Service;
 
   // new model
-  protected positionState: CharacteristicValue = 0;
-  protected currentPosition: CharacteristicValue = 0;
-  protected targetPosition: CharacteristicValue = 0;
+  protected positionState = 0;
+  protected currentPosition = 0;
+  protected targetPosition = 0;
   // end new model
 
   constructor(
@@ -49,17 +49,14 @@ export class Motor {
   }
 
   async getCurrentPosition(): Promise<CharacteristicValue> {
-    this.platform.log.debug('get current position with ', this.currentPosition);
     return this.currentPosition;
   }
 
   async getPositionState(): Promise<CharacteristicValue> {
-    this.platform.log.debug('get positionstate with ', this.positionState);
     return this.positionState;
   }
 
   async getTargetPosition(): Promise<CharacteristicValue> {
-    this.platform.log.debug('get targetposition with', this.targetPosition);
     return this.targetPosition;
   }
 
@@ -111,6 +108,6 @@ export class Motor {
     });
   }
 
-  convertLevelFromHB2Wiser = (level: number) => 100 - (level / 100);
-  convertLevelFromWiser2HB = (level: number) => (100 - level) * 100;
+  convertLevelFromHB2Wiser = (level: number) => (100 - level) * 100;
+  convertLevelFromWiser2HB = (level: number) => 100 - ((level / 100)>>0);
 }
