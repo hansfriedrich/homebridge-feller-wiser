@@ -1,4 +1,5 @@
 import { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
+import { urlToHttpOptions } from 'url';
 import { LoadState } from './model/loadstate';
 import { FellerWiserPlatform } from './platform';
 
@@ -49,14 +50,17 @@ export class Motor {
   }
 
   async getCurrentPosition(): Promise<CharacteristicValue> {
+    this.platform.log.debug('get current position with ', this.currentPosition);
     return this.currentPosition;
   }
 
   async getPositionState(): Promise<CharacteristicValue> {
+    this.platform.log.debug('get positionstate with ', this.positionState);
     return this.positionState;
   }
 
   async getTargetPosition(): Promise<CharacteristicValue> {
+    this.platform.log.debug('get targetposition with', this.targetPosition);
     return this.targetPosition;
   }
 
