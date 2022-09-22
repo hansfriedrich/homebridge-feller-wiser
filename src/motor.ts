@@ -1,5 +1,4 @@
 import { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
-import { urlToHttpOptions } from 'url';
 import { LoadState } from './model/loadstate';
 import { FellerWiserPlatform } from './platform';
 
