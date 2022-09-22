@@ -68,8 +68,8 @@ export class Motor {
         {
           'level': this.convertLevelFromHB2Wiser(value),
         })
-        .then((loadState: LoadState) => {
-          this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, this.convertLevelFromWiser2HB(loadState.level!));
+        .then(() => {
+          this.targetPosition = value;
         });
     }
   }
@@ -93,7 +93,7 @@ export class Motor {
     this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, this.convertLevelFromWiser2HB(loadState.level!));
     this.service.updateCharacteristic(this.platform.Characteristic.PositionState, this.positionState);
 
-    this.currentPosition = (10000 - loadState.level!) / 100;
+    this.currentPosition = this.convertLevelFromWiser2HB(loadState.level!);
     this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, this.convertLevelFromWiser2HB(loadState.level!));
 
     this.platform.log.debug('position state', this.positionState);
