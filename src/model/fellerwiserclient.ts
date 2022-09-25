@@ -18,6 +18,15 @@ export class FellerWiserClient{
   public loadStateChange : EventEmitter;
 
   constructor(config, log) {
+
+    if (!config.ip){
+      throw new Error('expectted a configured ip-address for the Wiser device');
+    }
+
+    if (!config.authkey){
+      throw new Error('expected a configured api-key for communication to the Wiser device');
+    }
+
     this.log = log;
     this.authkey = config.authkey;
     this.log.debug('feller client built');
@@ -83,6 +92,7 @@ export class FellerWiserClient{
         this.log.debug(json);
         if (json.status === 'error'){
           this.log.error('error occured', json.message);
+          throw new Error('an error occured fetching the loads');
         }
         const loads = json.data as Load[];
         return loads;
