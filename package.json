@@ -26,8 +26,6 @@
     "homebridge-plugin"
   ],
   "dependencies": {
-    "@homebridge/plugin-ui-utils": "^0.0.19",
-    "mdns": "^2.7.2",
     "node-fetch": "^2.6.6",
     "ws": "^8.3.0"
   },
