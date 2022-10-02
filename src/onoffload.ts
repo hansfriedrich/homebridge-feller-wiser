@@ -41,7 +41,7 @@ export class OnOffLoad {
 
     this.on = false;
 
-    this.platform.fellerClient.loadStateChange.on(this.accessory.context.load.id.toString(), (loadState) => this.updateOn(loadState));
+    this.platform.fellerClient?.loadStateChange.on(this.accessory.context.load.id.toString(), (loadState) => this.updateOn(loadState));
   }
 
   /**
@@ -52,7 +52,7 @@ export class OnOffLoad {
     // implement your own code to turn your device on/off
     this.platform.log.debug('Set Characteristic On ->', value);
     const target_loadstate = <LoadState>{'bri': value? 10000 : 0};
-    this.platform.fellerClient.setLoadState(this.accessory.context.load.id, target_loadstate).then((value) => {
+    this.platform.fellerClient?.setLoadState(this.accessory.context.load.id, target_loadstate).then((value) => {
       this.platform.log.debug('seted state on ' + this.accessory.context.load.id + ' to value:' + JSON.stringify(value));
       return;
     });
@@ -74,11 +74,6 @@ export class OnOffLoad {
   async getOn(): Promise<CharacteristicValue> {
 
     return this.on;
-    // REMOVE THIS
-    return this.platform.fellerClient.getLoadState(this.accessory.context.load.id).then((value)=> {
-      //this.platform.log.debug('Get Characteristic On: ' + value);
-      return value.bri !== 0;
-    });
 
     // if you need to return an error to show the device as "Not Responding" in the Home app:
     // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);

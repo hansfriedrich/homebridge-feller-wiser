@@ -20,7 +20,7 @@ export class FellerWiserClient{
   constructor(config, log) {
 
     if (!config.ip){
-      throw new Error('expectted a configured ip-address for the Wiser device');
+      throw new Error('expected a configured ip-address for the Wiser device');
     }
 
     if (!config.authkey){

@@ -43,7 +43,7 @@ export class Motor {
       .onSet(this.setHoldPosition.bind(this));
 
 
-    this.platform.fellerClient.loadStateChange.on(
+    this.platform.fellerClient?.loadStateChange.on(
       this.accessory.context.load.id.toString(),
       (loadState) => this.updateState(loadState));
   }
@@ -64,7 +64,7 @@ export class Motor {
     this.platform.log.debug('setTargetPosition ', value);
     if ('number' === typeof value) {
       this.targetPosition = value;
-      return this.platform.fellerClient.setLoadState(this.accessory.context.load.id,
+      return this.platform.fellerClient?.setLoadState(this.accessory.context.load.id,
         {
           'level': this.convertLevelFromHB2Wiser(value),
         })
@@ -102,7 +102,7 @@ export class Motor {
   }
 
   async setHoldPosition(): Promise<void> {
-    this.platform.fellerClient.ctrlLoad(this.accessory.context.load.id, {
+    this.platform.fellerClient?.ctrlLoad(this.accessory.context.load.id, {
       button: 'stop',
       event: 'click',
     });

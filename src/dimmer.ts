@@ -30,7 +30,7 @@ export class Dimmer extends OnOffLoad{
     this.platform.log.debug('setBrightness', value);
     if ('number' === typeof value){
       const loadstate = <LoadState>{ 'bri' : value * 100};
-      return this.platform.fellerClient.setLoadState(this.accessory.context.load.id, loadstate).then(() => {
+      return this.platform.fellerClient?.setLoadState(this.accessory.context.load.id, loadstate).then(() => {
         return;
       });
     }
@@ -38,16 +38,6 @@ export class Dimmer extends OnOffLoad{
 
   async getBrightness() : Promise<CharacteristicValue> {
     return this.brightness;
-
-    //this.platform.log.debug('getBrightness');
-    return this.platform.fellerClient.getLoadState(this.accessory.context.load.id).then((value) => {
-      //this.platform.log.debug('got value for dimmer', this.accessory.context.load.id, value);
-      if (typeof value.bri !== 'undefined') {
-        return value.bri / 100;
-      } else {
-        throw new Error('no value defined');
-      }
-    });
   }
 
   async updateOn(state: LoadState){

@@ -22,7 +22,7 @@ export class FellerWiserPlatform implements DynamicPlatformPlugin {
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
 
-  public readonly fellerClient: FellerWiserClient;
+  public readonly fellerClient?: FellerWiserClient;
 
   constructor(
     public readonly log: Logger,
@@ -30,7 +30,11 @@ export class FellerWiserPlatform implements DynamicPlatformPlugin {
     public readonly api: API,
   ) {
 
-    this.fellerClient = new FellerWiserClient(this.config, this.log);
+    try {
+      this.fellerClient = new FellerWiserClient(this.config, this.log);
+    } catch (error) {
+      this.log.error('error occured during feller client initialization: ', error);
+    }
 
 
     // When this event is fired it means Homebridge has restored all cached accessories from disk.
@@ -64,7 +68,7 @@ export class FellerWiserPlatform implements DynamicPlatformPlugin {
    * must not be registered again to prevent "duplicate UUID" errors.
    */
   discoverDevices() {
-    this.fellerClient.getLoads()
+    this.fellerClient?.getLoads()
       .then(loads => {
         for (const load of loads) {
           // edit this as more types are supported than onoff, dim or motor
