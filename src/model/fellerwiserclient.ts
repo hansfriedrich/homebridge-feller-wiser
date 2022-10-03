@@ -18,6 +18,15 @@ export class FellerWiserClient{
   public loadStateChange : EventEmitter;
 
   constructor(config, log) {
+
+    if (!config.ip){
+      throw new Error('expected a configured ip-address for the Wiser device');
+    }
+
+    if (!config.authkey){
+      throw new Error('expected a configured api-key for communication to the Wiser device');
+    }
+
     this.log = log;
     this.authkey = config.authkey;
     this.log.debug('feller client built');
@@ -56,12 +65,20 @@ export class FellerWiserClient{
       });
 
       result.on('close', (code, data) => {
-        this.log.error('websocket connetion closed with code', code, 'reason: ', data.toString(), '... reconnecting');
+        this.log.info('websocket connetion closed with code', code, 'reason: ', data.toString());
+        if (code === 1006){
+          this.log.error('cannot connect websocket');
+          return;
+        }
+        this.websocket.terminate();
         this.websocket = createWebSocket();
       });
 
       result.on('error', (error) => {
-        this.log.error('error occured on websocket', error.message, '... reconnecting');
+        this.log.error('Error on websocket occured with message:', error.message);
+        if (error.message === 'getaddrinfo ENOTFOUND'){
+          return;
+        }
         this.websocket = createWebSocket();
       });
 
@@ -83,6 +100,7 @@ export class FellerWiserClient{
         this.log.debug(json);
         if (json.status === 'error'){
           this.log.error('error occured', json.message);
+          throw new Error('an error occured fetching the loads');
         }
         const loads = json.data as Load[];
         return loads;
