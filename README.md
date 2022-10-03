@@ -24,5 +24,5 @@ To get an authkey follow the instructins on the [api documentation](https://gith
 * there is only a basic ui implemented
 * there is no support for rooms (adapt them in the homekit app)
 * loads get their name from the devices name provided by the api (adapt them in the homekit app)
-* ~~load motor has no 'stop' functionality~~
-* load type `dali` is not tested
+* load motor has no 'stop' functionality
+* load type `dali` is not tested - tested by the community
