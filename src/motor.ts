@@ -46,7 +46,7 @@ export class Motor {
       .onSet(this.setHoldPosition.bind(this));
 
     const laod_id = accessory.context.load.id;
-    const load_config = platform.config.accessories.find(accessoryConfig => accessoryConfig.id === laod_id);
+    const load_config = platform.config.accessories?.find(accessoryConfig => accessoryConfig.id === laod_id);
     if (load_config && load_config.tiltable === 'horizontal') {
       this.tiltable = load_config.tiltable;
       this.service.getCharacteristic(this.platform.Characteristic.CurrentHorizontalTiltAngle)
