@@ -16,6 +16,9 @@ export class Motor {
   protected positionState = 0;
   protected currentPosition = 0;
   protected targetPosition = 0;
+  protected currentTiltAngle = 0;
+  protected targetTiltAngle = 0;
+  private tiltable: string;
   // end new model
 
   constructor(
@@ -42,6 +45,27 @@ export class Motor {
     this.service.getCharacteristic(this.platform.Characteristic.HoldPosition)
       .onSet(this.setHoldPosition.bind(this));
 
+    const laod_id = accessory.context.load.id;
+    const load_config = platform.config.accessories.find(accessoryConfig => accessoryConfig.id === laod_id);
+    if (load_config && load_config.tiltable === 'horizontal') {
+      this.tiltable = load_config.tiltable;
+      this.service.getCharacteristic(this.platform.Characteristic.CurrentHorizontalTiltAngle)
+        .onGet(this.getCurrentTiltAngle.bind(this));
+      this.service.getCharacteristic(this.platform.Characteristic.TargetHorizontalTiltAngle)
+        .onGet(this.getTargetTiltAngle.bind(this))
+        .onSet(this.setTargetTiltAngle.bind(this));
+    } else {
+      if (load_config && load_config.tiltable === 'vertical') {
+        this.tiltable = load_config.tiltable;
+        this.service.getCharacteristic(this.platform.Characteristic.CurrentVerticalTiltAngle)
+          .onGet(this.getCurrentTiltAngle.bind(this));
+        this.service.getCharacteristic(this.platform.Characteristic.TargetVerticalTiltAngle)
+          .onGet(this.getTargetTiltAngle.bind(this))
+          .onSet(this.setTargetTiltAngle.bind(this));
+      } else {
+        this.tiltable = '';
+      }
+    }
 
     this.platform.fellerClient?.loadStateChange.on(
       this.accessory.context.load.id.toString(),
@@ -63,7 +87,6 @@ export class Motor {
   async setTargetPosition(value: CharacteristicValue): Promise<void> {
     this.platform.log.debug('setTargetPosition ', value);
     if ('number' === typeof value) {
-      this.targetPosition = value;
       return this.platform.fellerClient?.setLoadState(this.accessory.context.load.id,
         {
           'level': this.convertLevelFromHB2Wiser(value),
@@ -82,6 +105,7 @@ export class Motor {
         this.positionState = this.platform.Characteristic.PositionState.STOPPED;
         this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, this.convertLevelFromWiser2HB(loadState.level!));
         this.targetPosition = this.convertLevelFromWiser2HB(loadState.level!);
+        this.targetTiltAngle = this.convertAngleFromWiser2HB(loadState.tilt!);
         break;
       case 'down':
         this.positionState = this.platform.Characteristic.PositionState.DECREASING;
@@ -92,13 +116,20 @@ export class Motor {
     }
     this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, this.convertLevelFromWiser2HB(loadState.level!));
     this.service.updateCharacteristic(this.platform.Characteristic.PositionState, this.positionState);
-
+    if (this.tiltable === 'horizontal') {
+      this.service.updateCharacteristic(this.platform.Characteristic.CurrentHorizontalTiltAngle,
+        this.convertAngleFromWiser2HB(loadState.tilt!));
+    }
+    if (this.tiltable === 'vertical') {
+      this.service.updateCharacteristic(this.platform.Characteristic.CurrentVerticalTiltAngle,
+        this.convertAngleFromWiser2HB(loadState.tilt!));
+    }
     this.currentPosition = this.convertLevelFromWiser2HB(loadState.level!);
-    this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, this.convertLevelFromWiser2HB(loadState.level!));
 
     this.platform.log.debug('position state', this.positionState);
     this.platform.log.debug('current position', this.currentPosition);
     this.platform.log.debug('target position', this.targetPosition);
+    this.platform.log.debug('tilt angle', this.currentTiltAngle);
   }
 
   async setHoldPosition(): Promise<void> {
@@ -108,6 +139,25 @@ export class Motor {
     });
   }
 
+  async getCurrentTiltAngle(): Promise<CharacteristicValue> {
+    return this.currentTiltAngle;
+  }
+
+  async getTargetTiltAngle(): Promise<CharacteristicValue> {
+    return this.targetTiltAngle;
+  }
+
+  async setTargetTiltAngle(angle: CharacteristicValue): Promise<void> {
+    if ('number' === typeof (angle)) {
+      this.targetTiltAngle = this.convertAngleFromHB2Wiser(angle);
+      this.platform.fellerClient?.setLoadState(this.accessory.context.load.id, {
+        tilt: this.convertAngleFromHB2Wiser(angle),
+      });
+    }
+  }
+
   convertLevelFromHB2Wiser = (level: number) => (100 - level) * 100;
-  convertLevelFromWiser2HB = (level: number) => 100 - ((level / 100)>>0);
+  convertLevelFromWiser2HB = (level: number) => 100 - ((level / 100) >> 0);
+  convertAngleFromHB2Wiser = (angle: number) => ((angle + 90) * 5 / 100) >> 0;
+  convertAngleFromWiser2HB = (tilt: number) => tilt * 20 - 90;
 }
