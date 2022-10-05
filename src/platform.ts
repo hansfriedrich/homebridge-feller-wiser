@@ -75,7 +75,7 @@ export class FellerWiserPlatform implements DynamicPlatformPlugin {
           if (load.type !== 'onoff' && load.type !== 'dim' && load.type !== 'motor' && load.type !== 'dali') {
             continue;
           }
-          const uuid = this.api.hap.uuid.generate(load.name + '-' + load.id + '-' + load.channel);
+          const uuid = this.api.hap.uuid.generate(load.device + '-' + load.channel);
           const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
           if (existingAccessory) {
             this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
