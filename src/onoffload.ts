@@ -10,7 +10,7 @@ import { FellerWiserPlatform } from './platform';
  */
 export class OnOffLoad {
   protected service: Service;
-  protected on : boolean;
+  protected on: Promise<boolean>;
 
   constructor(
     protected readonly platform: FellerWiserPlatform,
@@ -39,7 +39,7 @@ export class OnOffLoad {
       .onSet(this.setOn.bind(this))                // SET - bind to the `setOn` method below
       .onGet(this.getOn.bind(this));               // GET - bind to the `getOn` method below
 
-    this.on = false;
+    this.on = new Promise(resolve => resolve(false));
 
     this.platform.fellerClient?.loadStateChange.on(this.accessory.context.load.id.toString(), (loadState) => this.updateOn(loadState));
   }
@@ -51,12 +51,15 @@ export class OnOffLoad {
   async setOn(value: CharacteristicValue) {
     // implement your own code to turn your device on/off
     this.platform.log.debug('Set Characteristic On ->', value);
-    const target_loadstate = <LoadState>{'bri': value? 10000 : 0};
-    this.platform.fellerClient?.setLoadState(this.accessory.context.load.id, target_loadstate).then((value) => {
-      this.platform.log.debug('seted state on ' + this.accessory.context.load.id + ' to value:' + JSON.stringify(value));
-      return;
+    const target_loadstate = <LoadState>{ 'bri': value ? 10000 : 0 };
+    this.on = new Promise(resolve => {
+      this.platform.fellerClient?.setLoadState(this.accessory.context.load.id, target_loadstate).then((value) => {
+        this.platform.log.debug('seted state on ' + this.accessory.context.load.id + ' to value:' + JSON.stringify(value));
+        resolve(value.bri! === 0);
+      });
     });
   }
+
 
   /**
    * Handle the "GET" requests from HomeKit
@@ -81,8 +84,8 @@ export class OnOffLoad {
   }
 
   //TODO: update this method name to "updateState"
-  async updateOn(state: LoadState) : Promise<void> {
-    this.on = state.bri !== 0;
+  async updateOn(state: LoadState): Promise<void> {
+    this.on = new Promise(resolve => resolve(state.bri !== 0));
     //this.platform.log.debug('update new loadstate on', this.accessory.context.load.id);
     this.service.updateCharacteristic(this.platform.Characteristic.On, state.bri !== 0);
   }
