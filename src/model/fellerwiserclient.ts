@@ -29,6 +29,11 @@ export class FellerWiserClient{
 
     this.log = log;
     this.authkey = config.authkey;
+
+    if (!this.authkey){
+      throw new Error('authentication key is required');
+    }
+
     this.log.debug('feller client built');
     this.loadStateChange = new EventEmitter();
 
@@ -100,7 +105,7 @@ export class FellerWiserClient{
         this.log.debug(json);
         if (json.status === 'error'){
           this.log.error('error occured', json.message);
-          throw new Error('an error occured fetching the loads');
+          throw new Error(json.message);
         }
         const loads = json.data as Load[];
         return loads;
