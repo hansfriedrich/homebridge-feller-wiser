@@ -93,8 +93,8 @@ export class FellerWiserPlatform implements DynamicPlatformPlugin {
                 new Dimmer(this, existingAccessory);
             }
           } else {
-            this.log.info('Adding new accessory:', load.device);
-            const accessory = new this.api.platformAccessory(load.device, uuid);
+            this.log.info('Adding new accessory:', load.name, load.device);
+            const accessory = new this.api.platformAccessory(load.name, uuid);
             accessory.context.load = load;
             switch (load.type) {
               case 'onoff':
