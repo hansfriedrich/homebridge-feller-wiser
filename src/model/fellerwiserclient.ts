@@ -11,7 +11,6 @@ import WebSocket from 'ws';
 
 export class FellerWiserClient{
   private authkey: string;
-  private authToken : string | undefined;
   private log : Logger;
   private websocket : WebSocket;
   private baseUrl: string;
@@ -126,7 +125,7 @@ export class FellerWiserClient{
   async setLoadState(id: number, state: LoadState): Promise<LoadState>{
     this.log.debug('setLoadstate for id ' + id);
     return fetch(this.baseUrl + '/loads/' + id + '/target_state', {
-      headers: {'Authorization': 'Bearer ' + this.authToken},
+      headers: {'Authorization': 'Bearer ' + this.authkey},
       method: 'put',
       body: JSON.stringify(state),
     })
@@ -145,7 +144,7 @@ export class FellerWiserClient{
 
   async ctrlLoad(id: number, loadCtrl : LoadCtrl){
     return fetch(this.baseUrl + '/loads/' + id + '/ctrl', {
-      headers: {'Authorization': 'Bearer ' + this.authToken},
+      headers: {'Authorization': 'Bearer ' + this.authkey},
       method: 'put',
       body: JSON.stringify(loadCtrl),
     })
