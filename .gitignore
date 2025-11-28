@@ -119,3 +119,5 @@ dist
 .yarn/build-state.yml
 .pnp.*
 .DS_Store
+
+test/hbConfig/

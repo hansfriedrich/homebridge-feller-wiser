@@ -1,8 +1,8 @@
 import { PlatformAccessory, CharacteristicValue } from 'homebridge';
-import { LoadState } from './model/loadstate';
-import { OnOffLoad } from './onoffload';
+import { LoadState } from './model/loadstate.js';
+import { OnOffLoad } from './onoffload.js';
 
-import { FellerWiserPlatform } from './platform';
+import { FellerWiserPlatform } from './platform.js';
 
 /**
  * Platform Accessory
@@ -31,7 +31,10 @@ export class Dimmer extends OnOffLoad {
     if ('number' === typeof value) {
       const loadstate = <LoadState>{ 'bri': value * 100 };
       this.brightness = new Promise(resolve => {
-        this.platform.fellerClient?.setLoadState(this.accessory.context.load.id, loadstate).then((loadstate) => {
+        this.platform.fellerClient?.setLoadState(
+          this.accessory.context.load.id,
+          loadstate,
+        ).then((loadstate: LoadState) => {
           resolve(loadstate.bri!);
         });
       });

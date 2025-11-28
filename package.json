@@ -4,6 +4,7 @@
   "version": "1.0.26",
   "description": "A short description about what your plugin does.",
   "license": "Apache-2.0",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git://github.com/hansfriedrich/homebridge-feller-wiser.git"
@@ -11,36 +12,38 @@
   "bugs": {
     "url": "https://github.com/hansfriedrich/homebridge-feller-wiser/issues"
   },
+  
   "engines": {
-    "node": ">=14.18.1",
-    "homebridge": ">=1.3.5"
+    "node": "^20.18.0 || ^22.10.0 || ^24.0.0",
+    "homebridge": "^1.8.0 || ^2.0.0-beta.0"
   },
   "main": "dist/index.js",
   "scripts": {
-    "lint": "eslint src/**.ts --max-warnings=0",
-    "watch": "npm run build && npm link && nodemon",
     "build": "rimraf ./dist && tsc",
-    "prepublishOnly": "npm run lint && npm run build"
+    "lint": "eslint . --max-warnings=0",
+    "prepublishOnly": "npm run lint && npm run build",
+    "watch": "npm run build && npm link && nodemon"
   },
   "keywords": [
     "homebridge-plugin"
   ],
   "dependencies": {
+    "homebridge-lib": "^7.1.12",
     "node-fetch": "^2.6.6",
-    "ws": "^8.3.0"
+    "ws": "^8.18.1"
   },
   "devDependencies": {
-    "@types/node": "^16.11.12",
-    "@types/node-fetch": "^3.0.3",
-    "@types/ws": "^8.2.2",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^8.0.1",
-    "homebridge": "^1.3.5",
-    "nodemon": "^2.0.13",
-    "rimraf": "^3.0.2",
-    "ts-node": "^10.3.0",
-    "typescript": "^4.4.4"
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.10.1",
+    "@types/node-fetch": "^2.6.13",
+    "@types/ws": "^8.18.1",
+    "eslint": "^9.39.1",
+    "homebridge": "^2.0.0-beta.55",
+    "nodemon": "^3.1.11",
+    "rimraf": "^6.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4"
   },
   "funding": {
     "type": "buymeacoffee",

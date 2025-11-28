@@ -1,11 +1,11 @@
 
 import { Logger } from 'homebridge';
 import fetch from 'node-fetch';
-import { JSendResponse } from './JSendResponse';
-import { Load } from './load';
-import { LoadState } from './loadstate';
-import { EventEmitter } from 'stream';
-import { LoadCtrl } from '../types';
+import { JSendResponse } from './JSendResponse.js';
+import { Load } from './load.js';
+import { LoadState } from './loadstate.js';
+import EventEmitter from 'node:events';
+import { LoadCtrl } from '../types.js';
 import WebSocket from 'ws';
 
 
@@ -16,7 +16,7 @@ export class FellerWiserClient{
   private baseUrl: string;
   public loadStateChange : EventEmitter;
 
-  constructor(config, log) {
+  constructor(config: { ip: string; authkey: string }, log: Logger) {
 
     if (!config.ip){
       throw new Error('expected a configured ip-address for the Wiser device');
@@ -31,10 +31,10 @@ export class FellerWiserClient{
     this.log.debug('feller client built');
     this.loadStateChange = new EventEmitter();
 
-    const createWebSocket = (ip = config.ip, authkey = config.authkey) => {
-      const result = new WebSocket('ws://' + ip + '/api', [], {headers: {'Authorization': 'Bearer ' + authkey}} );
+    const createWebSocket = (ip: string = config.ip, authkey: string = config.authkey): WebSocket => {
+      const result = new WebSocket('ws://' + ip + '/api', [], { headers: { 'Authorization': 'Bearer ' + authkey } } );
 
-      result.on('message', (message) => {
+      result.on('message', (message: Buffer) => {
         this.log.debug('message received', message.toLocaleString());
         const jsonMessage = JSON.parse(message.toLocaleString());
         const id = jsonMessage.load.id as number;
@@ -45,10 +45,10 @@ export class FellerWiserClient{
 
       result.on('open', () => {
         this.log.debug('websocket opened, sending command "dump_loads"');
-        result.send(JSON.stringify({'command': 'dump_loads'}));
+        result.send(JSON.stringify({ 'command': 'dump_loads' }));
 
         const keepalive = setInterval(() => {
-          result.ping((error) => {
+          result.ping((error: Error | null) => {
             if (error) {
               this.log.error('error on keepalive websocket', error);
               // if readystate = 3 (CLOSED) => reconnect
@@ -63,7 +63,7 @@ export class FellerWiserClient{
         }, 3600000 );
       });
 
-      result.on('close', (code, data) => {
+      result.on('close', (code: number, data: Buffer) => {
         this.log.info('websocket connetion closed with code', code, 'reason: ', data.toString());
         if (code === 1006){
           this.log.error('cannot connect websocket');
@@ -73,7 +73,7 @@ export class FellerWiserClient{
         this.websocket = createWebSocket();
       });
 
-      result.on('error', (error) => {
+      result.on('error', (error: Error) => {
         this.log.error('Error on websocket occured with message:', error.message);
         if (error.message === 'getaddrinfo ENOTFOUND'){
           return;
@@ -91,7 +91,7 @@ export class FellerWiserClient{
 
   async getLoads() : Promise<Load[]>{
     // fetch the loads through the http-api
-    const result = await fetch (this.baseUrl + '/loads', {headers: {'Authorization': 'Bearer ' + this.authkey}})
+    const result = await fetch (this.baseUrl + '/loads', { headers: { 'Authorization': 'Bearer ' + this.authkey } })
       .then((response) => {
         return response.json();
       })
@@ -111,9 +111,9 @@ export class FellerWiserClient{
   async getLoadState(id: number) : Promise<LoadState>{
 
     this.log.debug('fetching loadstate via API', this.baseUrl + '/loads/' + id + '/state');
-    return fetch(this.baseUrl + '/loads/' + id + '/state', {headers: {'Authorization': 'Bearer ' + this.authkey}})
+    return fetch(this.baseUrl + '/loads/' + id + '/state', { headers: { 'Authorization': 'Bearer ' + this.authkey } })
       .then((response) => {
-        return response.json() as JSendResponse;
+        return response.json() as unknown as JSendResponse;
       })
       .then((response) => {
         return response.data.state as LoadState;
@@ -125,7 +125,7 @@ export class FellerWiserClient{
   async setLoadState(id: number, state: LoadState): Promise<LoadState>{
     this.log.debug('setLoadstate for id ' + id);
     return fetch(this.baseUrl + '/loads/' + id + '/target_state', {
-      headers: {'Authorization': 'Bearer ' + this.authkey},
+      headers: { 'Authorization': 'Bearer ' + this.authkey },
       method: 'put',
       body: JSON.stringify(state),
     })
@@ -144,7 +144,7 @@ export class FellerWiserClient{
 
   async ctrlLoad(id: number, loadCtrl : LoadCtrl){
     return fetch(this.baseUrl + '/loads/' + id + '/ctrl', {
-      headers: {'Authorization': 'Bearer ' + this.authkey},
+      headers: { 'Authorization': 'Bearer ' + this.authkey },
       method: 'put',
       body: JSON.stringify(loadCtrl),
     })

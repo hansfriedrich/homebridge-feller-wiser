@@ -1,6 +1,6 @@
 import { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
-import { LoadState } from './model/loadstate';
-import { FellerWiserPlatform } from './platform';
+import { LoadState } from './model/loadstate.js';
+import { FellerWiserPlatform } from './platform.js';
 
 
 /*
@@ -78,17 +78,17 @@ export class Motor {
     this.platform.log.debug('updateState', loadState);
 
     switch (loadState.moving) {
-      case 'stop':
-        this.positionState = this.platform.Characteristic.PositionState.STOPPED;
-        this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, this.convertLevelFromWiser2HB(loadState.level!));
-        this.targetPosition = this.convertLevelFromWiser2HB(loadState.level!);
-        break;
-      case 'down':
-        this.positionState = this.platform.Characteristic.PositionState.DECREASING;
-        break;
-      case 'up':
-        this.positionState = this.platform.Characteristic.PositionState.INCREASING;
-        break;
+    case 'stop':
+      this.positionState = this.platform.Characteristic.PositionState.STOPPED;
+      this.service.updateCharacteristic(this.platform.Characteristic.TargetPosition, this.convertLevelFromWiser2HB(loadState.level!));
+      this.targetPosition = this.convertLevelFromWiser2HB(loadState.level!);
+      break;
+    case 'down':
+      this.positionState = this.platform.Characteristic.PositionState.DECREASING;
+      break;
+    case 'up':
+      this.positionState = this.platform.Characteristic.PositionState.INCREASING;
+      break;
     }
     this.service.updateCharacteristic(this.platform.Characteristic.CurrentPosition, this.convertLevelFromWiser2HB(loadState.level!));
     this.service.updateCharacteristic(this.platform.Characteristic.PositionState, this.positionState);

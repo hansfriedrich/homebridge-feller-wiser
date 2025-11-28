@@ -1,7 +1,7 @@
 import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
-import { LoadState } from './model/loadstate';
+import { LoadState } from './model/loadstate.js';
 
-import { FellerWiserPlatform } from './platform';
+import { FellerWiserPlatform } from './platform.js';
 
 /**
  * Platform Accessory
@@ -40,8 +40,14 @@ export class OnOffLoad {
       .onGet(this.getOn.bind(this));               // GET - bind to the `getOn` method below
 
     this.on = new Promise(resolve => resolve(false));
-
-    this.platform.fellerClient?.loadStateChange.on(this.accessory.context.load.id.toString(), (loadState) => this.updateOn(loadState));
+    
+     
+    this.platform.fellerClient?.loadStateChange.on(
+      this.accessory.context.load.id.toString(),
+      (loadState: LoadState): void => {
+        void this.updateOn(loadState);
+      },
+    );
   }
 
   /**
@@ -53,7 +59,7 @@ export class OnOffLoad {
     this.platform.log.debug('Set Characteristic On ->', value);
     const target_loadstate = <LoadState>{ 'bri': value ? 10000 : 0 };
     this.on = new Promise(resolve => {
-      this.platform.fellerClient?.setLoadState(this.accessory.context.load.id, target_loadstate).then((value) => {
+      this.platform.fellerClient?.setLoadState(this.accessory.context.load.id, target_loadstate).then((value: LoadState) => {
         this.platform.log.debug('seted state on ' + this.accessory.context.load.id + ' to value:' + JSON.stringify(value));
         resolve(value.bri! === 0);
       });
