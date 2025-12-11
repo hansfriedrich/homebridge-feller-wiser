@@ -24,6 +24,7 @@ To get an authkey follow the instructins on the [api documentation](https://gith
 
 ## known issues and limitations
 
+* not compatible with Wifi Device B (cannot test it on my end - maybe someone from the community)
 * there is only a basic ui implemented
 * there is no support for rooms (adapt them in the homekit app)
 * loads get their name from the devices name provided by the api (adapt them in the homekit app)
