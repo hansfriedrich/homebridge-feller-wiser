@@ -9,20 +9,20 @@ import { LoadCtrl } from '../types.js';
 import WebSocket from 'ws';
 
 
-export class FellerWiserClient{
+export class FellerWiserClient {
   private authkey: string;
-  private log : Logger;
-  private websocket : WebSocket;
+  private log: Logger;
+  private websocket: WebSocket;
   private baseUrl: string;
-  public loadStateChange : EventEmitter;
+  public loadStateChange: EventEmitter;
 
   constructor(config: { ip: string; authkey: string }, log: Logger) {
 
-    if (!config.ip){
+    if (!config.ip) {
       throw new Error('expected a configured ip-address for the Wiser device');
     }
 
-    if (!config.authkey){
+    if (!config.authkey) {
       throw new Error('expected a configured api-key for communication to the Wiser device');
     }
 
@@ -32,7 +32,7 @@ export class FellerWiserClient{
     this.loadStateChange = new EventEmitter();
 
     const createWebSocket = (ip: string = config.ip, authkey: string = config.authkey): WebSocket => {
-      const result = new WebSocket('ws://' + ip + '/api', [], { headers: { 'Authorization': 'Bearer ' + authkey } } );
+      const result = new WebSocket('ws://' + ip + '/api', [], { headers: { 'Authorization': 'Bearer ' + authkey } });
 
       result.on('message', (message: Buffer) => {
         this.log.debug('message received', message.toLocaleString());
@@ -52,7 +52,7 @@ export class FellerWiserClient{
             if (error) {
               this.log.error('error on keepalive websocket', error);
               // if readystate = 3 (CLOSED) => reconnect
-              if (this.websocket.readyState === 3){
+              if (this.websocket.readyState === 3) {
                 this.log.error('reconnecting');
                 this.websocket = createWebSocket();
               }
@@ -60,12 +60,12 @@ export class FellerWiserClient{
             }
           });
           this.log.debug('ping sent');
-        }, 3600000 );
+        }, 3600000);
       });
 
       result.on('close', (code: number, data: Buffer) => {
         this.log.info('websocket connetion closed with code', code, 'reason: ', data.toString());
-        if (code === 1006){
+        if (code === 1006) {
           this.log.error('cannot connect websocket');
           return;
         }
@@ -75,7 +75,7 @@ export class FellerWiserClient{
 
       result.on('error', (error: Error) => {
         this.log.error('Error on websocket occured with message:', error.message);
-        if (error.message === 'getaddrinfo ENOTFOUND'){
+        if (error.message === 'getaddrinfo ENOTFOUND') {
           return;
         }
         this.websocket = createWebSocket();
@@ -89,15 +89,15 @@ export class FellerWiserClient{
   }
 
 
-  async getLoads() : Promise<Load[]>{
+  async getLoads(): Promise<Load[]> {
     // fetch the loads through the http-api
-    const result = await fetch (this.baseUrl + '/loads', { headers: { 'Authorization': 'Bearer ' + this.authkey } })
+    const result = await fetch(this.baseUrl + '/loads', { headers: { 'Authorization': 'Bearer ' + this.authkey } })
       .then((response) => {
         return response.json();
       })
       .then((json) => {
         this.log.debug(json);
-        if (json.status === 'error'){
+        if (json.status === 'error') {
           this.log.error('error occured', json.message);
           throw new Error('an error occured fetching the loads');
         }
@@ -108,7 +108,7 @@ export class FellerWiserClient{
   }
 
   // dont use this method for getting a single load - they will be emitted via the websocket (see constructor)
-  async getLoadState(id: number) : Promise<LoadState>{
+  async getLoadState(id: number): Promise<LoadState> {
 
     this.log.debug('fetching loadstate via API', this.baseUrl + '/loads/' + id + '/state');
     return fetch(this.baseUrl + '/loads/' + id + '/state', { headers: { 'Authorization': 'Bearer ' + this.authkey } })
@@ -122,7 +122,7 @@ export class FellerWiserClient{
   }
 
   // sets the load state of the specified load with the given id
-  async setLoadState(id: number, state: LoadState): Promise<LoadState>{
+  async setLoadState(id: number, state: LoadState): Promise<LoadState> {
     this.log.debug('setLoadstate for id ' + id);
     return fetch(this.baseUrl + '/loads/' + id + '/target_state', {
       headers: { 'Authorization': 'Bearer ' + this.authkey },
@@ -133,7 +133,7 @@ export class FellerWiserClient{
         return response.json();
       })
       .then((json) => {
-        if (json.status === 'success'){
+        if (json.status === 'success') {
           return json.data as LoadState;
         } else {
           throw new Error(json.message);
@@ -142,7 +142,7 @@ export class FellerWiserClient{
 
   }
 
-  async ctrlLoad(id: number, loadCtrl : LoadCtrl){
+  async ctrlLoad(id: number, loadCtrl: LoadCtrl) {
     return fetch(this.baseUrl + '/loads/' + id + '/ctrl', {
       headers: { 'Authorization': 'Bearer ' + this.authkey },
       method: 'put',
@@ -153,5 +153,23 @@ export class FellerWiserClient{
       });
   }
 
+  async findLoad(id: number): Promise<void> {
+    this.log.debug('ping load for id ' + id);
+
+    return fetch(this.baseUrl + '/api/loads/' + id + '/ping', {
+      headers: { 'Authorization': 'Bearer ' + this.authkey },
+      method: 'put',
+      body: JSON.stringify({
+        'time_ms': 2000,
+        'blink_pattern': 'ramp',
+        'color': '#505050',
+      }),
+    }).then(() => {
+      return;
+    },
+    ).catch((error) => {
+      this.log.error('error on findLoad with id ', id, error);
+    });
+  }
 }
 
