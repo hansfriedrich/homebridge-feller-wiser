@@ -7,7 +7,13 @@
 This is a homebridge plugin for the [Wiser-by-Feller](https://wiser.feller.ch/) system based on the provided [api](https://github.com/Feller-AG/wiser-tutorial). 
 When activated it communicates with the wifi-device of the wiser-system to get a list of available loads and provides them as an accessoire in the homebridge system.
 
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/hansfr)
+This fork add an option to hide devices from homekit.
+
+Buy A Coffee to original creator :
+
+[!["Buy A Coffee to original creator"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/hansfr)
+
+
 
 ## Configuration
 

@@ -16,6 +16,16 @@
         "type": "string",
         "required": true,
         "default": ""
+      },
+      "excludedLoadNames": {
+        "title": "Excluded load names",
+        "type": "array",
+        "required": false,
+        "items": {
+          "title": "Load name",
+          "type": "string"
+        },
+        "description": "Loads whose name (exactly as configured in the Wiser system) matches one of these entries will not be exposed in HomeKit, and will be removed if already registered."
       }
     }
   }
