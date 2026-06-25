@@ -77,6 +77,12 @@ export class FellerWiserPlatform implements DynamicPlatformPlugin {
    * must not be registered again to prevent "duplicate UUID" errors.
    */
   discoverDevices() {
+    // Names of loads that should be excluded / removed from HomeKit (case-insensitive, trimmed match).
+    // Configure via "excludedLoadNames" in the platform config (array of strings).
+    const excludedLoadNames: string[] = ((this.config.excludedLoadNames as string[]) || [])
+      .filter(name => typeof name === 'string')
+      .map(name => name.trim().toLowerCase());
+
     this.fellerClient?.getLoads()
       .then(loads => {
         for (const load of loads) {
@@ -86,6 +92,19 @@ export class FellerWiserPlatform implements DynamicPlatformPlugin {
           }
           const uuid = this.api.hap.uuid.generate(load.device + '-' + load.channel);
           const existingAccessory = this.accessories.get(uuid);
+
+          const isExcluded = excludedLoadNames.includes(load.name.trim().toLowerCase());
+          if (isExcluded) {
+            if (existingAccessory) {
+              this.log.info('Excluded load found, removing accessory from HomeKit:', existingAccessory.displayName);
+              this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
+              this.accessories.delete(uuid);
+            } else {
+              this.log.info('Skipping excluded load (not registered):', load.name);
+            }
+            continue;
+          }
+
           if (existingAccessory) {
             this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
             switch (load.type) {
